@@ -1,2 +1,3 @@
 # stariler
-star + compiler is a typescript compiler written in rust.
+
+star + compiler is a Typescript compiler written in Go.
