@@ -1,3 +1,0 @@
-[submodule "typescript"]
-	path = third_party/typescript
-	url = https://github.com/oneofthezombies/TypeScript.git
