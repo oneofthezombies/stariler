@@ -10,7 +10,7 @@ Stariler is a compound word of star and compiler and is pronounced stáilər.
 If you are using the `npm` package manager,
 
 ```shell
-npm install --save-dev @oneofthezombies/stariler
+npm install -D @oneofthezombies/stariler
 ```
 
 ## How to use
