@@ -21,4 +21,7 @@
 go.work
 
 # third party dependencies
-third_party/
+third_party/typescript/
+
+# node.js
+node_modules/

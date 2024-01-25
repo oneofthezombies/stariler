@@ -32,24 +32,48 @@ var initCmd = &cobra.Command{
 			}
 		}()
 
-		const (
-			typescriptPath = "third_party/typescript"
-		)
-
-		if _, err := os.Stat(typescriptPath); err == nil {
-			fmt.Printf("%s already exists. deleting...\n", typescriptPath)
-			if err := os.RemoveAll(typescriptPath); err != nil {
-				return err
-			}
+		if err := installTypeScript(ctx); err != nil {
+			return err
 		}
 
-		proc := exec.CommandContext(ctx, "git", "clone", "--depth", "1", "--branch", "v5.3.3", "https://github.com/oneofthezombies/TypeScript.git", typescriptPath)
-		proc.Stdout = os.Stdout
-		proc.Stderr = os.Stderr
-		return proc.Run()
+		if err := installReferenceProject(ctx); err != nil {
+			return err
+		}
+
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+}
+
+func installTypeScript(ctx context.Context) error {
+	const (
+		typescriptPath = "third_party/typescript"
+	)
+
+	if _, err := os.Stat(typescriptPath); err == nil {
+		fmt.Printf("%s already exists. deleting...\n", typescriptPath)
+		if err := os.RemoveAll(typescriptPath); err != nil {
+			return err
+		}
+	}
+
+	proc := exec.CommandContext(ctx, "git", "clone", "--depth", "1", "--branch", "v5.3.3", "https://github.com/oneofthezombies/TypeScript.git", typescriptPath)
+	proc.Stdout = os.Stdout
+	proc.Stderr = os.Stderr
+	return proc.Run()
+}
+
+func installReferenceProject(ctx context.Context) error {
+	const (
+		referenceProjectPath = "third_party/reference_project"
+	)
+
+	proc := exec.CommandContext(ctx, "npm", "install")
+	proc.Dir = referenceProjectPath
+	proc.Stdout = os.Stdout
+	proc.Stderr = os.Stderr
+	return proc.Run()
 }
