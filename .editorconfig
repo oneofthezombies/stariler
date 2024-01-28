@@ -6,17 +6,14 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{*.go,Makefile,.gitmodules,go.mod,go.sum}]
-indent_style = tab
-
 [*.md]
 indent_style = tab
 trim_trailing_whitespace = false
 
-[*.{yml,yaml,json,js,jsx,ts,tsx,css}]
+[*.{yml,yaml,toml,json,js,jsx,ts,tsx,css}]
 indent_style = space
 indent_size = 2
 
-[*.py]
+[*.{py,rs}]
 indent_style = space
 indent_size = 4

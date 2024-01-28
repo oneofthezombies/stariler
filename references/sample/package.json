@@ -1,7 +1,7 @@
 {
-  "name": "reference_project",
+  "name": "sample",
   "version": "1.0.0",
-  "description": "Reference project for the TypeScript",
+  "description": "Sample project for the TypeScript compiler",
   "main": "index.js",
   "scripts": {
     "build": "tsc",

@@ -1,5 +1,8 @@
 {
-    "recommendations": [
-        "golang.go"
-    ]
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "esbenp.prettier-vscode",
+    "vadimcn.vscode-lldb",
+    "tamasfe.even-better-toml"
+  ]
 }

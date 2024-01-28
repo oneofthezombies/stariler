@@ -1,6 +1,6 @@
 # Stariler
 
-Stariler is a TypeScript compiler written in Go.  
+Stariler is a TypeScript compiler written in Rust.  
 Stariler is a compound word of star and compiler and is pronounced stáilər.  
 
 🚧 _This project is currently in development and is not yet available for production._
