@@ -3,6 +3,10 @@ use std::error::Error;
 
 fn init() -> Result<(), Box<dyn Error>> {
     println!("Initializing development environment...");
+    // create directory references/typescript
+
+    // "git", "clone", "--depth", "1", "--branch", "v5.3.3", "https://github.com/oneofthezombies/TypeScript.git" on references/typescript
+    // npm install on references/sample
     Ok(())
 }
 
