@@ -58,7 +58,7 @@ impl Runner {
     }
 
     fn run(self) {
-        let mut command = process::Command::new(self.program.to_string());
+        let mut command = process::Command::new(&self.program);
         command
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
