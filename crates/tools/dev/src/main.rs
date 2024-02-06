@@ -47,7 +47,8 @@ impl Runner {
     }
 
     fn args(mut self, args: &[&str]) -> Self {
-        self.args.extend(args.iter().map(|s| s.to_string()));
+        self.args
+            .extend(args.iter().map(std::string::ToString::to_string));
         self
     }
 
