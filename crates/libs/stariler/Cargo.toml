@@ -1,6 +1,6 @@
 [package]
 name = "stariler"
-description = "TypeScript compiler library"
+description = "TypeScript compiler library written in Rust."
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

@@ -3,7 +3,7 @@ members = ["crates/libs/*", "crates/apps/*", "crates/tools/*"]
 resolver = "2"
 
 [workspace.package]
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 authors = ["oneofthezombies"]
 repository = "https://github.com/oneofthezombies/stariler"
