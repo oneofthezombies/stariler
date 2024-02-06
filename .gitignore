@@ -18,6 +18,3 @@ references/typescript/
 
 # node.js
 node_modules/
-
-# temporary files
-temp/

@@ -1,10 +1,35 @@
-# 디자인
+# Development Environment
 
-cli 툴로 먼저 만든다.  
-만들고나서 npm.js에 패키지를 배포한다.  
+## Host Platform Information
 
-# 구현
+```sh
+# systeminfo | findstr /B /C:"OS Name" /B /C:"OS Version"
+OS Name:                   Microsoft Windows 11 Pro
+OS Version:                10.0.22621 N/A Build 22621
+```
 
-5.3.3 버전의 타입스크립트 버전을 기준으로 작업한다.  
-현재 작업 경로에서 tsconfig.json 파일을 찾는다.  
-tsconfig.json을 바탕으로 컴파일을 수행한다.  
+## Rust Compiler Information
+
+```sh
+# rustc -vV
+rustc 1.75.0 (82e1608df 2023-12-21)
+binary: rustc
+commit-hash: 82e1608dfa6e0b5569232559e3d385fea5a93112
+commit-date: 2023-12-21
+host: x86_64-pc-windows-msvc
+release: 1.75.0
+LLVM version: 17.0.6
+```
+
+## Requirements
+
+### Node.js
+
+Required to view the tsc CLI reference.
+
+#### Version
+
+```sh
+# node --version
+v20.11.0
+```

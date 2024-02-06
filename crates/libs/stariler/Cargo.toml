@@ -1,0 +1,11 @@
+[package]
+name = "stariler"
+description = "TypeScript compiler library"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
