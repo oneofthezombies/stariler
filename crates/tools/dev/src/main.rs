@@ -30,23 +30,33 @@ enum Command {
 }
 
 fn init() {
-    fs::create_dir_all("references/typescript").unwrap();
-    if fs::metadata("references/typescript").is_ok() {
-        info!("TypeScript repository already exists. Skip clone.");
-    } else {
-        info!("Clone TypeScript repository...");
-        new!(
-            "git clone --depth 1 --branch v5.3.3 https://github.com/oneofthezombies/TypeScript.git"
-        )
-        .build()
-        .current_dir("references/typescript")
-        .run();
+    let is_run_on_github_actions = env::var("GITHUB_ACTIONS").is_ok();
+    if !is_run_on_github_actions {
+        run!("rustup install nightly");
     }
-    new!("npm install")
-        .build()
-        .current_dir("references/sample")
-        .run();
-    info!("TypeScript references is ready.");
+
+    run!("rustup component add rustfmt clippy --toolchain nightly");
+    run!("rustup override set nightly");
+
+    if !is_run_on_github_actions {
+        fs::create_dir_all("references/typescript").unwrap();
+        if fs::metadata("references/typescript").is_ok() {
+            info!("TypeScript repository already exists. Skip clone.");
+        } else {
+            info!("Clone TypeScript repository...");
+            new!(
+                "git clone --depth 1 --branch v5.3.3 https://github.com/oneofthezombies/TypeScript.git"
+            )
+            .build()
+            .current_dir("references/typescript")
+            .run();
+        }
+        new!("npm install")
+            .build()
+            .current_dir("references/sample")
+            .run();
+        info!("TypeScript references is ready.");
+    }
 }
 
 fn check() {
@@ -86,7 +96,6 @@ fn build(target: &str) {
         }
 
         let mut output_file = std::fs::OpenOptions::new()
-            .write(true)
             .append(true)
             .open(output_path)
             .unwrap();
