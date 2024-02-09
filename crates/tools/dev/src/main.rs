@@ -1,11 +1,9 @@
 use clap::{arg, command, Parser, Subcommand};
+use sheller::{new, run, CommandExt};
 use std::fs;
 use std::io::Write;
-use std::{
-    env,
-    path::Path,
-    process::{self, Stdio},
-};
+use std::{env, path::Path};
+use tracing::info;
 
 #[derive(Parser)]
 #[command(arg_required_else_help = true)]
@@ -31,154 +29,77 @@ enum Command {
     PrePush,
 }
 
-struct Runner {
-    program: String,
-    args: Vec<String>,
-    cwd: String,
-}
-
-impl Runner {
-    fn new(program: &str) -> Self {
-        Self {
-            program: program.to_string(),
-            args: Vec::new(),
-            cwd: ".".to_string(),
-        }
-    }
-
-    fn args(mut self, args: &[&str]) -> Self {
-        self.args
-            .extend(args.iter().map(std::string::ToString::to_string));
-        self
-    }
-
-    fn cwd(mut self, cwd: &str) -> Self {
-        self.cwd = cwd.to_string();
-        self
-    }
-
-    fn run(self) {
-        let mut command = process::Command::new(&self.program);
-        command
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .args(&self.args)
-            .current_dir(self.cwd);
-        println!("Run {} {:?}", self.program, self.args);
-        match command.status() {
-            Ok(status) => {
-                if !status.success() {
-                    eprintln!("Exit code: {:?}", status.code());
-                    std::process::exit(1);
-                }
-            }
-            Err(e) => {
-                eprintln!("Error: {e:?}");
-                std::process::exit(1);
-            }
-        }
-    }
-}
-
 fn init() {
     fs::create_dir_all("references/typescript").unwrap();
     if fs::metadata("references/typescript").is_ok() {
-        println!("TypeScript repository already exists. Skip clone.");
+        info!("TypeScript repository already exists. Skip clone.");
     } else {
-        println!("Clone TypeScript repository...");
-        Runner::new("git")
-            .args(&[
-                "clone",
-                "--depth",
-                "1",
-                "--branch",
-                "v5.3.3",
-                "https://github.com/oneofthezombies/TypeScript.git",
-            ])
-            .cwd("references/typescript")
-            .run();
-    }
-
-    Runner::new("npm")
-        .args(&["install"])
-        .cwd("references/sample")
+        info!("Clone TypeScript repository...");
+        new!(
+            "git clone --depth 1 --branch v5.3.3 https://github.com/oneofthezombies/TypeScript.git"
+        )
+        .build()
+        .current_dir("references/typescript")
         .run();
-    println!("Done init.");
+    }
+    new!("npm install")
+        .build()
+        .current_dir("references/sample")
+        .run();
+    info!("TypeScript references is ready.");
 }
 
 fn check() {
-    Runner::new("cargo").args(&["check", "--workspace"]).run();
+    run!("cargo check --workspace");
 }
 
 fn clippy() {
-    Runner::new("cargo")
-        .args(&[
-            "clippy",
-            "--",
-            "-D",
-            "clippy::all",
-            "-D",
-            "clippy::pedantic",
-        ])
-        .run();
+    run!("cargo clippy -- -D clippy::all -D clippy::pedantic");
 }
 
 fn fmt() {
-    Runner::new("cargo").args(&["fmt", "--", "--check"]).run();
+    run!("cargo fmt -- --check");
 }
 
 fn build(target: &str) {
-    if env::var("GITHUB_ACTIONS").is_ok() && cfg!(target_os = "linux") {
-        Runner::new("sudo")
-            .args(&["apt", "install", "musl-tools"])
-            .run();
+    let is_run_on_github_actions = env::var("GITHUB_ACTIONS").is_ok();
+    if is_run_on_github_actions && cfg!(target_os = "linux") {
+        run!("sudo apt install musl-tools");
     }
 
     env::set_var("RUSTFLAGS", "-C target-feature=+crt-static");
-    Runner::new("rustup").args(&["target", "add", target]).run();
-    Runner::new("cargo")
-        .args(&["build", "-p", "star", "-r", "--target", target])
-        .run();
+    run!("rustup target add {target}");
+    run!("cargo build --package star --release --target {target}");
 
-    if env::var("GITHUB_ACTIONS").is_ok() {
-        let output = env::var("GITHUB_OUTPUT").expect("No GITHUB_OUTPUT");
-        let windows_path = Path::new("target")
-            .join(target)
-            .join("release")
-            .join("star.exe");
-        let file_path = if windows_path.exists() {
-            windows_path
+    if is_run_on_github_actions {
+        let output_path = env::var("GITHUB_OUTPUT").expect("No GITHUB_OUTPUT");
+        let release_dir_path = Path::new("target").join(target).join("release");
+        let windows_exe_path = release_dir_path.join("star.exe");
+        let exe_path = if windows_exe_path.exists() {
+            windows_exe_path
         } else {
-            Path::new("target")
-                .join(target)
-                .join("release")
-                .join("star")
+            release_dir_path.join("star")
         };
 
         if cfg!(unix) {
-            Runner::new("chmod")
-                .args(&["+x", file_path.to_str().unwrap()])
-                .run();
+            run!("chmod +x {}", exe_path.display());
         }
 
-        let mut output_path = std::fs::OpenOptions::new()
+        let mut output_file = std::fs::OpenOptions::new()
             .write(true)
             .append(true)
-            .open(output)
+            .open(output_path)
             .unwrap();
-        writeln!(output_path, "ARTIFACT_PATH={}", file_path.to_str().unwrap()).unwrap();
+        writeln!(output_file, "ARTIFACT_PATH={}", exe_path.display()).unwrap();
     }
 }
 
 fn test(target: Option<String>) {
-    let Some(target) = target else {
-        Runner::new("cargo").args(&["test", "--workspace"]).run();
-        return;
-    };
-
-    Runner::new("cargo")
-        .args(&["test", "--target", target.as_str()])
-        .run();
+    if let Some(target) = target {
+        run!("cargo test --target {target}");
+    } else {
+        run!("cargo test --workspace");
+    }
 }
 
 fn pre_push() {
@@ -188,12 +109,21 @@ fn pre_push() {
     test(None);
 }
 
+fn init_log() {
+    tracing::subscriber::set_global_default(
+        tracing_subscriber::FmtSubscriber::builder()
+            .with_max_level(tracing::Level::TRACE)
+            .finish(),
+    )
+    .expect("setting default subscriber failed");
+}
+
 fn main() {
+    init_log();
     let cli = Cli::parse();
     let Some(command) = cli.command else {
         panic!("No command");
     };
-
     match command {
         Command::Init => init(),
         Command::Check => check(),
