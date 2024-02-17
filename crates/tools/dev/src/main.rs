@@ -22,13 +22,16 @@ enum Command {
         #[arg(short, long)]
         target: String,
     },
-    Test {
-        #[arg(short, long)]
-        target: Option<String>,
-    },
+    Test,
     PrePush,
 }
 
+/// During Github Actions Workflow, when running `rustup install nightly` inside a `cargo run --package tool-dev -- init` command on a Windows platform, it will fail with the following error:
+/// ```text
+/// error: could not create link from 'C:\Users\runneradmin\.cargo\bin\rustup.exe' to 'C:\Users\runneradmin\.cargo\bin\cargo.exe'
+/// ```
+/// So for Github Action, I changed to call `rustup install nightly` before calling `cargo run --package tool-dev -- init`.
+/// Please see the workflow file at `.github/workflows/CI.yml`.
 fn init() {
     let is_run_on_github_actions = env::var("GITHUB_ACTIONS").is_ok();
     if !is_run_on_github_actions {
@@ -60,15 +63,15 @@ fn init() {
 }
 
 fn check() {
-    run!("cargo check --workspace");
+    run!("cargo check --workspace --all-targets --all-features");
 }
 
 fn clippy() {
-    run!("cargo clippy -- -D clippy::all -D clippy::pedantic");
+    run!("cargo clippy --workspace --all-targets --all-features -- -D clippy::all -D clippy::pedantic");
 }
 
 fn fmt() {
-    run!("cargo fmt -- --check");
+    run!("cargo fmt --all --check");
 }
 
 fn build(target: &str) {
@@ -103,19 +106,15 @@ fn build(target: &str) {
     }
 }
 
-fn test(target: Option<String>) {
-    if let Some(target) = target {
-        run!("cargo test --target {target}");
-    } else {
-        run!("cargo test --workspace");
-    }
+fn test() {
+    run!("cargo test --workspace --all-targets --all-features -- --nocapture");
 }
 
 fn pre_push() {
     check();
     clippy();
     fmt();
-    test(None);
+    test();
 }
 
 fn init_log() {
@@ -139,7 +138,7 @@ fn main() {
         Command::Clippy => clippy(),
         Command::Fmt => fmt(),
         Command::Build { target } => build(&target),
-        Command::Test { target } => test(target),
+        Command::Test => test(),
         Command::PrePush => pre_push(),
     }
 }
