@@ -1,4 +1,4 @@
 pub mod core;
 pub use core::{Error, Result};
-pub mod input;
+pub mod data;
 mod tsconfig;

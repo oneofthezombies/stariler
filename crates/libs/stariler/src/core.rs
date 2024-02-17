@@ -4,8 +4,10 @@ pub static TS_CONFIG_FILE_NAME: &str = "tsconfig.json";
 pub enum Error {
     Io(std::io::Error),
     SerdeJson(serde_json::Error),
-    ConflictArgs { reason: String },
-    NotFound { path: String },
+    TsConfigNotFound { path: std::path::PathBuf },
+    FilesArgEmpty,
+    FileArgNotFound { path: std::path::PathBuf },
+    FilesArgAndProjectArgConflict { files: Vec<String>, project: String },
 }
 
 impl From<std::io::Error> for Error {
