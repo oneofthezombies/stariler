@@ -9,6 +9,10 @@ pub struct Input {
     pub kind: Kind,
 }
 
+/// Parse the command line arguments into an `Input` struct.
+///
+/// # Errors
+/// TODO
 pub fn parse_cli(
     files: Option<Vec<String>>,
     project: Option<String>,
