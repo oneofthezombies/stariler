@@ -55,8 +55,9 @@ impl Input {
                     });
                 }
                 if path.is_dir() {
-                    let ts_config = crate::tsconfig::read_ts_config(&path.join("tsconfig.json"))?;
+                    Ok(Config { paths: vec![] })
                 } else {
+                    Ok(Config { paths: vec![] })
                 }
             }
         }
