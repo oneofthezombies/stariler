@@ -17,7 +17,7 @@ impl Default for TsConfig {
     }
 }
 
-pub fn read_ts_config(path: &std::path::Path) -> crate::core::Result<TsConfig> {
+fn read_ts_config(path: &std::path::Path) -> crate::core::Result<TsConfig> {
     let file = std::fs::File::open(path)?;
     let reader = std::io::BufReader::new(file);
     let ts_config: TsConfig = serde_json::from_reader(reader)?;
