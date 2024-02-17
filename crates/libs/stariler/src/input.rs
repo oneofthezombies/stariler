@@ -13,7 +13,7 @@ pub struct Input {
 ///
 /// # Errors
 /// TODO
-pub fn parse_cli(
+pub fn new_input_from_cli(
     files: Option<Vec<String>>,
     project: Option<String>,
 ) -> crate::core::Result<Input> {
