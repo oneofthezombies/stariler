@@ -92,6 +92,10 @@ async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOu
     })
 }
 
+/// Parse the input arguments and run the application.
+///
+/// # Errors
+/// TODO
 pub async fn run(arg_input: ArgInput) -> crate::Result<ConfigOutput> {
     let arg_output = parse_arg_input(arg_input).await?;
     let config_input = match arg_output.kind {
