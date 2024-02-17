@@ -1,3 +1,5 @@
+pub static TS_CONFIG_FILE_NAME: &str = "tsconfig.json";
+
 #[derive(Debug)]
 pub enum Error {
     Io(std::io::Error),
@@ -20,50 +22,8 @@ impl From<serde_json::Error> for Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug)]
-pub enum InputKind {
-    Files(Vec<String>),
-    Project(String),
-}
+pub trait TryFromAsync<T>: Sized {
+    type Error;
 
-#[derive(Debug)]
-pub struct Input {
-    pub kind: InputKind,
-}
-
-impl Input {
-    /// Parse by kind of input.
-    ///
-    /// # Errors
-    /// TODO
-    pub fn parse(&self) -> crate::Result<Config> {
-        match &self.kind {
-            InputKind::Files(files) => {
-                let mut paths = vec![];
-                for file in files {
-                    let path = std::path::PathBuf::from(file);
-                    if !path.try_exists()? {
-                        return Err(crate::Error::NotFound {
-                            path: file.to_string(),
-                        });
-                    }
-                    paths.push(path);
-                }
-                Ok(Config { paths })
-            }
-            InputKind::Project(project) => {
-                let path = std::path::PathBuf::from(project);
-                if !path.try_exists()? {
-                    return Err(crate::Error::NotFound {
-                        path: project.to_string(),
-                    });
-                }
-                Ok(Config { paths: vec![] })
-            }
-        }
-    }
-}
-
-struct Config {
-    paths: Vec<std::path::PathBuf>,
+    fn try_from_async(t: T) -> impl std::future::Future<Output = std::result::Result<Self, Error>>;
 }

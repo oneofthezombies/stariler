@@ -12,11 +12,12 @@ fn init_log() {
     .expect("setting default subscriber failed");
 }
 
-fn main() -> stariler::Result<()> {
+#[tokio::main]
+async fn main() -> stariler::Result<()> {
     init_log();
     let cli = crate::cli::Cli::parse();
     debug!(cli = ?cli, "cli");
-    let input = stariler::core::Input::try_from(cli)?;
+    let input = stariler::input::Data::try_from(cli)?;
     debug!(input = ?input, "input");
     Ok(())
 }
