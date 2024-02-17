@@ -89,3 +89,14 @@ async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOu
         source_paths: vec![],
     })
 }
+
+async fn parse(arg_input: ArgInput) -> crate::Result<ConfigOutput> {
+    let arg_output = parse_arg_input(arg_input).await?;
+    let config_input = match arg_output.kind {
+        ArgOutputKind::Files { source_paths } => ConfigInput {
+            ts_config_path: std::path::PathBuf::new(),
+        },
+        ArgOutputKind::Project { ts_config_path } => ConfigInput { ts_config_path },
+    };
+    parse_config_input(config_input).await
+}
