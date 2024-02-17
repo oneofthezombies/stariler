@@ -14,20 +14,20 @@ pub struct Cli {
     pub(crate) project: Option<String>,
 }
 
-impl TryFrom<crate::cli::Cli> for stariler::input::Input {
+impl TryFrom<crate::cli::Cli> for stariler::core::Input {
     type Error = stariler::Error;
 
-    fn try_from(cli: crate::cli::Cli) -> stariler::Result<stariler::input::Input> {
+    fn try_from(cli: crate::cli::Cli) -> stariler::Result<stariler::core::Input> {
         let kind = match (cli.files, cli.project) {
-            (None, None) => stariler::input::Kind::Project(".".to_string()),
-            (None, Some(project)) => stariler::input::Kind::Project(project),
-            (Some(files), None) => stariler::input::Kind::Files(files),
+            (None, None) => stariler::core::InputKind::Project(".".to_string()),
+            (None, Some(project)) => stariler::core::InputKind::Project(project),
+            (Some(files), None) => stariler::core::InputKind::Files(files),
             (Some(_), Some(_)) => {
-                return Err(stariler::Error::ConflictingArguments {
+                return Err(stariler::Error::ConflictArgs {
                     reason: "files and project are mutually exclusive".to_string(),
                 })
             }
         };
-        Ok(stariler::input::Input { kind })
+        Ok(stariler::core::Input { kind })
     }
 }
