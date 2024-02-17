@@ -54,11 +54,7 @@ impl Input {
                         path: project.to_string(),
                     });
                 }
-                if path.is_dir() {
-                    Ok(Config { paths: vec![] })
-                } else {
-                    Ok(Config { paths: vec![] })
-                }
+                Ok(Config { paths: vec![] })
             }
         }
     }
