@@ -75,9 +75,11 @@ struct ConfigInput {
     ts_config_path: std::path::PathBuf,
 }
 
+// TODO: remove pub visibility
 #[derive(Debug)]
-struct ConfigOutput {
-    source_paths: Vec<std::path::PathBuf>,
+pub struct ConfigOutput {
+    // TODO: remove pub visibility
+    pub source_paths: Vec<std::path::PathBuf>,
 }
 
 async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOutput> {
@@ -90,7 +92,7 @@ async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOu
     })
 }
 
-async fn parse(arg_input: ArgInput) -> crate::Result<ConfigOutput> {
+pub async fn run(arg_input: ArgInput) -> crate::Result<ConfigOutput> {
     let arg_output = parse_arg_input(arg_input).await?;
     let config_input = match arg_output.kind {
         ArgOutputKind::Files { source_paths } => ConfigInput {

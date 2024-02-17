@@ -17,10 +17,11 @@ async fn main() -> stariler::Result<()> {
     init_log();
     let cli = crate::cli::Cli::parse();
     debug!(cli = ?cli, "cli");
-    let input = stariler::data::ArgInput {
+    let arg_input = stariler::data::ArgInput {
         files: cli.files,
         project: cli.project,
     };
-    debug!(input = ?input, "input");
+    debug!(arg_input = ?arg_input, "arg_input");
+    let _ = stariler::data::run(arg_input).await?;
     Ok(())
 }
