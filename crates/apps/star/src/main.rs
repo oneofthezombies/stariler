@@ -1,14 +1,7 @@
-use clap::{Parser, Subcommand};
+mod cli;
 
-#[derive(Parser)]
-#[command(arg_required_else_help = true)]
-struct Cli {
-    #[command(subcommand)]
-    command: Option<Command>,
-}
-
-#[derive(Subcommand)]
-enum Command {}
+use clap::Parser;
+use tracing::debug;
 
 fn init_log() {
     tracing::subscriber::set_global_default(
@@ -19,10 +12,11 @@ fn init_log() {
     .expect("setting default subscriber failed");
 }
 
-fn main() {
+fn main() -> stariler::Result<()> {
     init_log();
-    let cli = Cli::parse();
-    let Some(_command) = cli.command else {
-        panic!("No command");
-    };
+    let cli = crate::cli::Cli::parse();
+    debug!(cli = ?cli, "cli");
+    let input = stariler::input::parse_cli(cli.files, cli.project)?;
+    debug!(input = ?input, "input");
+    Ok(())
 }
