@@ -32,6 +32,10 @@ pub struct Input {
 }
 
 impl Input {
+    /// Parse by kind of input.
+    ///
+    /// # Errors
+    /// TODO
     pub fn parse(&self) -> crate::Result<Config> {
         match &self.kind {
             InputKind::Files(files) => {
