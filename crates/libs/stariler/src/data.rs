@@ -86,9 +86,33 @@ async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOu
     let ts_config_path = config_input.ts_config_path;
     let ts_config_content = tokio::fs::read_to_string(&ts_config_path).await?;
     let ts_config: crate::tsconfig::TsConfig = serde_json::from_str(&ts_config_content)?;
-    let ts_config = crate::tsconfig::update_exclude(ts_config);
+    let ts_config = crate::tsconfig::resolve_exclude(ts_config);
+    // include filter by exclude without files
+    let mut source_path_set = std::collections::HashSet::new();
+    for files in ts_config.files {
+        let path = std::path::PathBuf::from(files);
+        source_path_set.insert(path);
+    }
+    for include in ts_config.include {
+        let paths = glob::glob(&include)?.filter_map(|r| match r {
+            Ok(p) => {
+                if p.is_file() {
+                    return Some(p);
+                }
+                None
+            }
+            Err(e) => {
+                debug!("Glob pattern error: {:?}", e);
+                None
+            }
+        });
+        for path in paths {
+            source_path_set.insert(path);
+        }
+    }
+    // TODO
     Ok(ConfigOutput {
-        source_paths: vec![],
+        source_paths: source_path_set.into_iter().collect(),
     })
 }
 

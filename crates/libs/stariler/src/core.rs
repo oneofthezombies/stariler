@@ -4,6 +4,7 @@ pub static TS_CONFIG_FILE_NAME: &str = "tsconfig.json";
 pub enum Error {
     Io(std::io::Error),
     SerdeJson(serde_json::Error),
+    GlobPattern(glob::PatternError),
     TsConfigNotFound { path: std::path::PathBuf },
     FilesArgEmpty,
     FileArgNotFound { path: std::path::PathBuf },
@@ -19,6 +20,12 @@ impl From<std::io::Error> for Error {
 impl From<serde_json::Error> for Error {
     fn from(err: serde_json::Error) -> Self {
         Self::SerdeJson(err)
+    }
+}
+
+impl From<glob::PatternError> for Error {
+    fn from(err: glob::PatternError) -> Self {
+        Self::GlobPattern(err)
     }
 }
 
