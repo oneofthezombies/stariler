@@ -14,8 +14,33 @@ const regExpWithEscape = /regexp\//;
 const regExpWithFlags = /regexp/gi;
 const regExpWithFlagsAndSpaces = /reg exp/gi;
 class A {
-    foo() {
+    한국어() {
     }
 };
 const instance = new A();
-instance .foo();
+instance                                       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.한국어(
+
+);
+let		
+
+
+a = 1;
