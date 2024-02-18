@@ -142,8 +142,8 @@ async fn run(arg_input: ArgInput) -> crate::Result<()> {
 async fn tokenize(path: std::path::PathBuf) -> crate::Result<()> {
     use tokio::io::AsyncReadExt;
 
-    let mut file = tokio::fs::File::open(&path).await?;
     const BUFFER_SIZE: usize = 4 * 1024;
+    let mut file = tokio::fs::File::open(&path).await?;
     let mut untokenized = Vec::with_capacity(BUFFER_SIZE);
     let mut buffer = [0; BUFFER_SIZE];
     loop {
