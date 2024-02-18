@@ -44,9 +44,3 @@ impl From<tokio::task::JoinError> for Error {
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
-
-pub trait TryFromAsync<T>: Sized {
-    type Error;
-
-    fn try_from_async(t: T) -> impl std::future::Future<Output = std::result::Result<Self, Error>>;
-}
