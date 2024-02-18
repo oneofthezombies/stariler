@@ -128,20 +128,20 @@ async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOu
     })
 }
 
-async fn parse_arg_output(arg_output: ArgOutput) -> crate::Result<Vec<std::path::PathBuf>> {
+async fn parse_arg_output(arg_output: ArgOutput) -> crate::Result<ConfigOutput> {
     match arg_output.kind {
-        ArgOutputKind::Files { source_paths } => Ok(source_paths),
+        ArgOutputKind::Files { source_paths } => Ok(ConfigOutput { source_paths }),
         ArgOutputKind::Project { ts_config_path } => {
             let config_input = ConfigInput { ts_config_path };
             let config_output = parse_config_input(config_input).await?;
-            Ok(config_output.source_paths)
+            Ok(config_output)
         }
     }
 }
 
 async fn run(arg_input: ArgInput) -> crate::Result<()> {
     let arg_output = parse_arg_input(arg_input).await?;
-    let source_paths = parse_arg_output(arg_output).await?;
+    let config_output = parse_arg_output(arg_output).await?;
     Ok(())
 }
 
