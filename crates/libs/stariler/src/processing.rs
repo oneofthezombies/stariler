@@ -12,7 +12,7 @@ async fn parse_arg_input(arg_input: ArgInput) -> crate::Result<ArgOutput> {
         (None, None) => {
             debug!("No input files or project specified, use current directory as project path");
             let ts_config_path =
-                crate::utils::parse_ts_config_path(std::env::current_dir()?).await?;
+                crate::util::parse_ts_config_path(std::env::current_dir()?).await?;
             ArgOutputKind::Project { ts_config_path }
         }
         (Some(files), None) => {
@@ -46,7 +46,7 @@ async fn parse_arg_input(arg_input: ArgInput) -> crate::Result<ArgOutput> {
         (None, Some(project)) => {
             debug!("Project specified, use as project path");
             let project_path = std::path::PathBuf::from(project);
-            let ts_config_path = crate::utils::parse_ts_config_path(project_path).await?;
+            let ts_config_path = crate::util::parse_ts_config_path(project_path).await?;
             ArgOutputKind::Project { ts_config_path }
         }
         (Some(files), Some(project)) => {
@@ -85,7 +85,7 @@ struct ConfigOutput {
 #[instrument]
 async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOutput> {
     let ts_config_path = config_input.ts_config_path;
-    let ts_config_content = crate::utils::read_file(ts_config_path).await?;
+    let ts_config_content = crate::util::read_file(ts_config_path).await?;
     let ts_config: crate::tsconfig::TsConfig = serde_json::from_str(&ts_config_content)?;
     let ts_config = crate::tsconfig::resolve_exclude(ts_config);
     let source_path_set = ts_config.files.iter().map(std::path::PathBuf::from).fold(
@@ -138,17 +138,33 @@ async fn run(arg_input: ArgInput) -> crate::Result<()> {
     Ok(())
 }
 
+#[instrument]
+async fn tokenize(path: std::path::PathBuf) -> crate::Result<()> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::fs::File::open(&path).await?;
+    const BUFFER_SIZE: usize = 4 * 1024;
+    let mut untokenized = Vec::with_capacity(BUFFER_SIZE);
+    let mut buffer = [0; BUFFER_SIZE];
+    loop {
+        let n = file.read(&mut buffer[..]).await?;
+        if n == 0 {
+            break;
+        }
+        untokenized.extend_from_slice(&buffer[..n]);
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[tokio::test]
     async fn test_run() {
-        let arg_input = ArgInput {
-            files: None,
-            project: None,
-        };
-        // let result = run(arg_input).await;
-        // assert!(result.is_ok());
+        let path = std::path::PathBuf::from(
+            "/Users/hunhoekim/repo/stariler/references/sample/src/index.ts",
+        );
+        let _ = tokenize(path).await.unwrap();
     }
 }

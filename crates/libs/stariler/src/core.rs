@@ -2,10 +2,11 @@ pub static TS_CONFIG_FILE_NAME: &str = "tsconfig.json";
 
 #[derive(Debug)]
 pub enum Error {
-    Io(std::io::Error),
-    SerdeJson(serde_json::Error),
+    StdIo(std::io::Error),
+    StdStrUtf8(std::str::Utf8Error),
     GlobPattern(glob::PatternError),
     GlobGlob(glob::GlobError),
+    SerdeJson(serde_json::Error),
     TokioTaskJoin(tokio::task::JoinError),
     TsConfigNotFound { path: std::path::PathBuf },
     FilesArgEmpty,
@@ -15,7 +16,13 @@ pub enum Error {
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
-        Self::Io(err)
+        Self::StdIo(err)
+    }
+}
+
+impl From<std::str::Utf8Error> for Error {
+    fn from(err: std::str::Utf8Error) -> Self {
+        Self::StdStrUtf8(err)
     }
 }
 
