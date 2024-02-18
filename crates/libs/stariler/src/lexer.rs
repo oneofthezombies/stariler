@@ -2,9 +2,15 @@ use lazy_static::lazy_static;
 use tracing::instrument;
 
 lazy_static! {
-    /// Unicode `Pattern_White_Space` characters.
-    /// please see https://www.unicode.org/reports/tr31/#R3a.
-    static ref WHITESPACES: Vec<String> = vec![
+    static ref WHITESPACES: Vec<String> = get_whitespaces();
+    static ref MATCHERS: Vec<Matcher> = get_matchers();
+}
+
+/// Unicode `Pattern_White_Space` characters.
+/// please see https://www.unicode.org/reports/tr31/#R3a.
+// TODO: refactor to return Vec<Vec<u8>>
+fn get_whitespaces() -> Vec<String> {
+    vec![
         String::from('\u{000A}'), // line feed
         String::from('\u{000B}'), // vertical tabulation
         String::from('\u{000C}'), // form feed
@@ -12,42 +18,61 @@ lazy_static! {
         String::from('\u{0085}'), // next line
         String::from('\u{2028}'), // line separator
         String::from('\u{2029}'), // paragraph separator
-    ];
+    ]
+}
 
-    static ref MATCHERS:Vec<Matcher> = vec![
+fn get_matchers() -> Vec<Matcher> {
+    vec![
         Matcher {
-kind: TokenKind::KeywordLet,
+            kind: TokenKind::KeywordLet,
             is_produce: true,
-            is_match: |b| {
-                if b.starts_with(b"let") {
+            is_match: |buf| {
+                // TODO: refactor to reusable function
+                if buf.starts_with(b"let") {
                     Some(3)
                 } else {
                     None
                 }
-        }},
+            },
+        },
         Matcher {
             kind: TokenKind::Whitespace,
             is_produce: false,
-            is_match: |b| {
-                for ws in WHITESPACES.iter() {
-                    if b.starts_with(ws.as_bytes()) {
-                        return Some(ws.len());
+            is_match: |buf| {
+                let mut i = 0;
+                while i < buf.len() {
+                    let mut found = false;
+                    for ws in WHITESPACES.iter() {
+                        if buf[i..].starts_with(ws.as_bytes()) {
+                            i += ws.len();
+                            found = true;
+                            break;
+                        }
+                    }
+                    if !found {
+                        break;
                     }
                 }
-                None
-            }
+                if i > 0 {
+                    Some(i)
+                } else {
+                    None
+                }
+            },
         },
-    ];
+    ]
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 enum TokenKind {
     KeywordLet,
     Whitespace,
 }
 
-type Start = usize;
-type End = usize;
+type Position = usize;
+type Length = usize;
+type Start = Position;
+type End = Position;
 
 /// It's a half-open interval.  
 /// `start` is inclusive, `end` is exclusive.
@@ -60,8 +85,8 @@ struct Span {
 #[derive(Debug)]
 struct Matcher {
     kind: TokenKind,
-    is_produce: bool,
-    is_match: fn(&[u8]) -> Option<End>,
+    pub(crate) is_produce: bool,
+    pub(crate) is_match: fn(&[u8]) -> Option<Length>,
 }
 
 #[derive(Debug)]
@@ -69,6 +94,28 @@ struct Token {
     kind: TokenKind,
     span: Span,
     value: Option<Vec<u8>>,
+}
+
+#[instrument]
+fn do_match(file_position: Position, buffer: &[u8]) -> Option<(Length, Option<Token>)> {
+    for matcher in MATCHERS.iter() {
+        if let Some(end) = (matcher.is_match)(buffer) {
+            let token = if matcher.is_produce {
+                Some(Token {
+                    kind: matcher.kind,
+                    span: Span {
+                        start: file_position,
+                        end: file_position + end,
+                    },
+                    value: String::from_utf8(buffer[..end].to_vec()).ok(),
+                })
+            } else {
+                None
+            };
+            return Some((end, token));
+        }
+    }
+    None
 }
 
 #[instrument]
@@ -96,7 +143,7 @@ mod tests {
 
     #[tokio::test]
     async fn let_foo_0() {
-        let token_buffer = vec![b'l', b'e', b't', b' '];
+        let token_buffer = String::from("let foo = 0").as_bytes();
         match token_buffer.as_slice() {
             [] => {
                 println!("empty");
