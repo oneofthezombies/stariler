@@ -4,7 +4,7 @@ use tracing::instrument;
 lazy_static! {
     /// Unicode `Pattern_White_Space` characters.
     /// please see https://www.unicode.org/reports/tr31/#R3a.
-    static ref WHITE_SPACES: Vec<String> = vec![
+    static ref WHITESPACES: Vec<String> = vec![
         String::from('\u{000A}'), // line feed
         String::from('\u{000B}'), // vertical tabulation
         String::from('\u{000C}'), // form feed
@@ -18,20 +18,25 @@ lazy_static! {
         Matcher {
 kind: TokenKind::KeywordLet,
             is_produce: true,
-            is_match: |b| match b {
-            [b'l', b'e', b't', ..] => Some(3),
-            _ => None,
+            is_match: |b| {
+                if b.starts_with(b"let") {
+                    Some(3)
+                } else {
+                    None
+                }
         }},
         Matcher {
             kind: TokenKind::Whitespace,
             is_produce: false,
-            is_match: |b| match b {
-            [b' ', ..] => Some(1),
-            [b'\t', ..] => Some(1),
-            [b'\n', ..] => Some(1),
-            [b'\r', ..] => Some(1),
-            _ => None,
-        }},
+            is_match: |b| {
+                for ws in WHITESPACES.iter() {
+                    if b.starts_with(ws.as_bytes()) {
+                        return Some(ws.len());
+                    }
+                }
+                None
+            }
+        },
     ];
 }
 
