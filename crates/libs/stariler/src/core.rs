@@ -5,6 +5,8 @@ pub enum Error {
     Io(std::io::Error),
     SerdeJson(serde_json::Error),
     GlobPattern(glob::PatternError),
+    GlobGlob(glob::GlobError),
+    TokioTaskJoin(tokio::task::JoinError),
     TsConfigNotFound { path: std::path::PathBuf },
     FilesArgEmpty,
     FileArgNotFound { path: std::path::PathBuf },
@@ -26,6 +28,18 @@ impl From<serde_json::Error> for Error {
 impl From<glob::PatternError> for Error {
     fn from(err: glob::PatternError) -> Self {
         Self::GlobPattern(err)
+    }
+}
+
+impl From<glob::GlobError> for Error {
+    fn from(err: glob::GlobError) -> Self {
+        Self::GlobGlob(err)
+    }
+}
+
+impl From<tokio::task::JoinError> for Error {
+    fn from(err: tokio::task::JoinError) -> Self {
+        Self::TokioTaskJoin(err)
     }
 }
 

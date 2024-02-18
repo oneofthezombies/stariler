@@ -22,6 +22,5 @@ async fn main() -> stariler::Result<()> {
         project: cli.project,
     };
     debug!(arg_input = ?arg_input, "arg_input");
-    let _ = stariler::data::run(arg_input).await?;
     Ok(())
 }
