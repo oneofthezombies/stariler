@@ -107,7 +107,8 @@ fn do_match(file_position: Position, buffer: &[u8]) -> Option<(Length, Option<To
                         start: file_position,
                         end: file_position + end,
                     },
-                    value: String::from_utf8(buffer[..end].to_vec()).ok(),
+                    // TODO: copy the value from buffer
+                    value: None,
                 })
             } else {
                 None
@@ -144,16 +145,5 @@ mod tests {
     #[tokio::test]
     async fn let_foo_0() {
         let token_buffer = String::from("let foo = 0").as_bytes();
-        match token_buffer.as_slice() {
-            [] => {
-                println!("empty");
-            }
-            [b'l', b'e', b't', ..] => {
-                println!("let");
-            }
-            [..] => {
-                println!("unknown");
-            }
-        }
     }
 }
