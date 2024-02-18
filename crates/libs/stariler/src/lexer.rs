@@ -81,22 +81,6 @@ async fn tokenize(path: std::path::PathBuf) -> crate::Result<()> {
             break;
         }
         token_buffer.extend_from_slice(&file_buffer[..n]);
-        loop {
-            match token_buffer.as_slice() {
-                [] => {
-                    println!("empty");
-                    break;
-                }
-                [b'l', b'e', b't', ..] => {
-                    println!("let");
-                    break;
-                }
-                [..] => {
-                    println!("unknown");
-                    break;
-                }
-            }
-        }
     }
     Ok(())
 }
