@@ -7,7 +7,7 @@ lazy_static! {
 }
 
 /// Unicode `Pattern_White_Space` characters.
-/// please see https://www.unicode.org/reports/tr31/#R3a.
+/// please see <https://www.unicode.org/reports/tr31/#R3a>.
 // TODO: refactor to return Vec<Vec<u8>>
 fn get_whitespaces() -> Vec<String> {
     vec![
