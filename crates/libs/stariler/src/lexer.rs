@@ -50,7 +50,7 @@ mod tests {
 
     #[tokio::test]
     async fn single_quote_string() {
-        const SOURCE: &str = r#"let s = 'hello';"#;
+        const SOURCE: &str = r"let s = 'hello';";
         parse(SOURCE.as_bytes()).unwrap();
     }
 }
