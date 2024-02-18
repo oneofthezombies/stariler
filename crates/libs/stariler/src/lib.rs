@@ -1,6 +1,6 @@
 mod core;
 pub use core::{Error, Result};
+mod lexer;
 mod processing;
-mod tokenize;
 mod tsconfig;
 mod util;

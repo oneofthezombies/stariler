@@ -13,3 +13,9 @@ const regExp = /regexp/;
 const regExpWithEscape = /regexp\//;
 const regExpWithFlags = /regexp/gi;
 const regExpWithFlagsAndSpaces = /reg exp/gi;
+class A {
+    foo() {
+    }
+};
+const instance = new A();
+instance .foo();
