@@ -1,4 +1,4 @@
-use tracing::debug;
+use tracing::{debug, instrument};
 
 #[derive(Debug)]
 pub struct ArgInput {
@@ -6,6 +6,7 @@ pub struct ArgInput {
     pub project: Option<String>,
 }
 
+#[instrument]
 async fn parse_arg_input(arg_input: ArgInput) -> crate::Result<ArgOutput> {
     let kind = match (arg_input.files, arg_input.project) {
         (None, None) => {
@@ -92,6 +93,7 @@ struct ConfigOutput {
     source_paths: Vec<std::path::PathBuf>,
 }
 
+#[instrument]
 async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOutput> {
     let ts_config_path = config_input.ts_config_path;
     let ts_config_content = tokio::fs::read_to_string(&ts_config_path).await?;
@@ -128,6 +130,7 @@ async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOu
     })
 }
 
+#[instrument]
 async fn parse_arg_output(arg_output: ArgOutput) -> crate::Result<ConfigOutput> {
     match arg_output.kind {
         ArgOutputKind::Files { source_paths } => Ok(ConfigOutput { source_paths }),
@@ -139,6 +142,7 @@ async fn parse_arg_output(arg_output: ArgOutput) -> crate::Result<ConfigOutput> 
     }
 }
 
+#[instrument]
 async fn run(arg_input: ArgInput) -> crate::Result<()> {
     let arg_output = parse_arg_input(arg_input).await?;
     let config_output = parse_arg_output(arg_output).await?;
