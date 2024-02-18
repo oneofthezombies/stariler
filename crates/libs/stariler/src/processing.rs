@@ -11,13 +11,8 @@ async fn parse_arg_input(arg_input: ArgInput) -> crate::Result<ArgOutput> {
     let kind = match (arg_input.files, arg_input.project) {
         (None, None) => {
             debug!("No input files or project specified, use current directory as project path");
-            let ts_config_path = std::env::current_dir()?.join(crate::core::TS_CONFIG_FILE_NAME);
-            let metadata = tokio::fs::metadata(&ts_config_path).await?;
-            if !metadata.is_file() {
-                return Err(crate::Error::TsConfigNotFound {
-                    path: ts_config_path,
-                });
-            }
+            let ts_config_path =
+                crate::utils::parse_ts_config_path(std::env::current_dir()?).await?;
             ArgOutputKind::Project { ts_config_path }
         }
         (Some(files), None) => {
@@ -50,14 +45,8 @@ async fn parse_arg_input(arg_input: ArgInput) -> crate::Result<ArgOutput> {
         }
         (None, Some(project)) => {
             debug!("Project specified, use as project path");
-            let ts_config_path =
-                std::path::PathBuf::from(project).join(crate::core::TS_CONFIG_FILE_NAME);
-            let metadata = tokio::fs::metadata(&ts_config_path).await?;
-            if !metadata.is_file() {
-                return Err(crate::Error::TsConfigNotFound {
-                    path: ts_config_path,
-                });
-            }
+            let project_path = std::path::PathBuf::from(project);
+            let ts_config_path = crate::utils::parse_ts_config_path(project_path).await?;
             ArgOutputKind::Project { ts_config_path }
         }
         (Some(files), Some(project)) => {
@@ -96,7 +85,7 @@ struct ConfigOutput {
 #[instrument]
 async fn parse_config_input(config_input: ConfigInput) -> crate::Result<ConfigOutput> {
     let ts_config_path = config_input.ts_config_path;
-    let ts_config_content = tokio::fs::read_to_string(&ts_config_path).await?;
+    let ts_config_content = crate::utils::read_file(ts_config_path).await?;
     let ts_config: crate::tsconfig::TsConfig = serde_json::from_str(&ts_config_content)?;
     let ts_config = crate::tsconfig::resolve_exclude(ts_config);
     let source_path_set = ts_config.files.iter().map(std::path::PathBuf::from).fold(
