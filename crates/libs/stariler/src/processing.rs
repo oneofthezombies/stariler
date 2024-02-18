@@ -165,6 +165,6 @@ mod tests {
         let path = std::path::PathBuf::from(
             "/Users/hunhoekim/repo/stariler/references/sample/src/index.ts",
         );
-        let _ = tokenize(path).await.unwrap();
+        let () = tokenize(path).await.unwrap();
     }
 }
